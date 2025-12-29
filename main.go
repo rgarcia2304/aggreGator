@@ -5,6 +5,15 @@ import(
 	"fmt"
 )
 
+type state struct{
+	cfg *config.Config 
+}
+
+type command struct{
+	name string
+	args [] string
+	validCmds map[string]func(*state, command) error
+}
 
 func main(){
 	baseConfig, err := config.Read()
@@ -23,5 +32,6 @@ func main(){
 	}
 
 	//print the contents of the config struct 
-	fmt.Sprintf("User is: %s (url is %s)", baseConfig.Username, baseConfig.Url) 
+	currUser := fmt.Sprintf("User is: %s (url is %s)", baseConfig.Username, baseConfig.Url)
+	fmt.Println(currUser)
 }
