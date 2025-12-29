@@ -5,6 +5,8 @@ import(
 	"os"
 	"path/filepath"
 	"encoding/json"
+	"io"
+	"bytes"
 
 )
 type Config struct{
@@ -14,19 +16,28 @@ type Config struct{
 
 func getConfigFilePath() (string, error){
 	//read the JSON File from the home directory 
-	homePath := os.UserHomeDir()
+	homePath, err := os.UserHomeDir()
+	if err != nil{
+		return "", errors.New("There is an issue getting the homedirectory")
+	}
+
 	//combine and clean this with the location of the file
-	fileLocation, err := homepath.Ext(".gatorconfig.json")
+	fileLocation := homePath + "/.gatorconfig.json"
+	cleanedPath := filepath.Clean(fileLocation)
 	
 	if err != nil{
 		return "", errors.New("Location Was Not Created Properly")
 	}
 	
-	return fileLocation, nil
+	return cleanedPath, nil
 }
 
-func (cfg *Config) Write(error){
-	configFilePath := getConfigFilePath()
+func (cfg *Config) Write() (error){
+	configFilePath, err := getConfigFilePath()
+	if err != nil{
+		return err
+	}
+
 	f, err := os.Create(configFilePath)
 
 	if err != nil{
@@ -41,38 +52,47 @@ func (cfg *Config) Write(error){
 		return err
 	}
 
-	_, err = io.Copy(f, r)
+	_, err = io.Copy(f, bytes.NewReader(r))
 	return err
 }
 
-func Read() (*Config, error){
+func Read() (Config, error){
 	configFilePath, err := getConfigFilePath()
 	
 	if err != nil{
-		return err
+		return Config{}, err
 	}
 
 	f, err := os.Open(configFilePath)
 	
 	if err != nil{
-		return errors.New("There was an error loading the file")
+		return Config{}, errors.New("There was an error loading the file")
 	}	
 
 	defer f.Close()
+	
+	byteValue, err := io.ReadAll(f)
+	if err != nil{
+		return Config{}, errors.New("There was an issue reading the file into bytes")
+	}
 
 	//Now unmarshal the data into the config struct 
 	cfg := Config{} 
 	
-	if err := json.Unmarshal(f, &cfg); err != nil{
+	if err := json.Unmarshal(byteValue, &cfg); err != nil{
 		return Config{}, errors.New("Could not Unmarshall Data into Config Struct")
 	}
 
-	return &cfg, nil
+	return cfg, nil
 }
 
-func (cfg *Config) SetUser(string user) error{
+func (cfg *Config) SetUser(user string) error{
 	cfg.Username = user
-	_, err := cfg.Write()
+	err := cfg.Write()
+	if err != nil{
+		return errors.New("There has been an issue writing")
+	}
+
 	return err
 }
 
