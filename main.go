@@ -2,9 +2,11 @@ package main
 
 import(
 	"github.com/rgarcia2304/aggreGator/internal/config"
+	"github.com/rgarcia2304/aggreGator/internal/database/sql"
 	"fmt"
 	"os"
 	_ "github.com/lib/pq"
+	
 )	
 
 type state struct{
@@ -23,12 +25,15 @@ type commands struct{
 
 func main(){
 
-	//open connection to database
-	db, err := sql.Open("postgres", dbURL); 
-	dbQueries := database.New(db)
+	
 
 	stateStct, err := config.Read()
-	baseState := state{cfg: &stateStct}
+
+	//open connection to database
+	db, err := sql.Open("postgres", stateStct.Url); 
+	dbQueries := database.New(db)
+
+	baseState := state{cfg: &stateStct, db: dbQueries}
 
 	if err != nil{
 		fmt.Println(err)
@@ -41,22 +46,21 @@ func main(){
 
 	//initialize the command struct 
 	cmd := command{}
-	
-	err = cmds.register("login", handlerLogin)
-	if err != nil{
-		fmt.Println(err)
-		return
-	}
-
 	//register the arguments to get the commands 
 	cmd.args = os.Args
-	
 	fmt.Print(cmd.args)
 	if len(cmd.args) < 2{
 		fmt.Println("Not enough arguments passed")
 		return 
 	}
 	cmd.name = cmd.args[1]
+
+	err = cmds.register(cmd.name, register)
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+
 	err = cmds.run(&baseState, cmd)
 	
 	if err != nil{
