@@ -3,6 +3,7 @@ package main
 import(
 	"github.com/rgarcia2304/aggreGator/internal/config"
 	"fmt"
+	"os"
 )
 
 type state struct{
@@ -11,27 +12,47 @@ type state struct{
 
 type command struct{
 	name string
-	args [] string
-	validCmds map[string]func(*state, command) error
+	args []string
+}
+
+type commands struct{
+	validCmds map[string]func(*state, command) error	
 }
 
 func main(){
-	baseConfig, err := config.Read()
+	stateStct, err := config.Read()
+	baseState := state{cfg: &stateStct}
 	if err != nil{
 		fmt.Println(err)
+		return
 	}
 	
-	err = baseConfig.SetUser("Rodrigo")
+	//initialize the commands struct
+	cmdsMap := make(map[string]func(*state, command) error)
+	cmds := commands{validCmds: cmdsMap}
+
+	//initialize the command struct 
+	cmd := command{}
+	
+	err = cmds.register("login", handlerLogin)
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+
+	//register the arguments to get the commands 
+	cmd.args = os.Args
+	
+	fmt.Print(cmd.args)
+	if len(cmd.args) < 2{
+		fmt.Println("Not enough arguments passed")
+		return 
+	}
+	cmd.name = cmd.args[1]
+	err = cmds.run(&baseState, cmd)
+	
 	if err != nil{
 		fmt.Println(err)
 	}
 
-	baseConfig, err = config.Read()
-	if err != nil{
-		fmt.Println(err)
-	}
-
-	//print the contents of the config struct 
-	currUser := fmt.Sprintf("User is: %s (url is %s)", baseConfig.Username, baseConfig.Url)
-	fmt.Println(currUser)
 }
