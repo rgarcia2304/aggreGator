@@ -4,10 +4,12 @@ import(
 	"github.com/rgarcia2304/aggreGator/internal/config"
 	"fmt"
 	"os"
-)
+	_ "github.com/lib/pq"
+)	
 
 type state struct{
 	cfg *config.Config 
+	db *database.Queries
 }
 
 type command struct{
@@ -20,8 +22,14 @@ type commands struct{
 }
 
 func main(){
+
+	//open connection to database
+	db, err := sql.Open("postgres", dbURL); 
+	dbQueries := database.New(db)
+
 	stateStct, err := config.Read()
 	baseState := state{cfg: &stateStct}
+
 	if err != nil{
 		fmt.Println(err)
 		return
