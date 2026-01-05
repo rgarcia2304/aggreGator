@@ -67,6 +67,12 @@ func main(){
 		return
 	}
 
+	err = cmds.register("reset", handlerReset)
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+
 
 
 	err = cmds.run(&baseState, cmd)
