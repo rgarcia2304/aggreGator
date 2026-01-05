@@ -2,11 +2,11 @@ package main
 
 import(
 	"github.com/rgarcia2304/aggreGator/internal/config"
-	"github.com/rgarcia2304/aggreGator/internal/database/sql"
+	"github.com/rgarcia2304/aggreGator/internal/database"
 	"fmt"
 	"os"
 	_ "github.com/lib/pq"
-	
+	"database/sql"	
 )	
 
 type state struct{
@@ -55,11 +55,19 @@ func main(){
 	}
 	cmd.name = cmd.args[1]
 
-	err = cmds.register(cmd.name, register)
+	err = cmds.register("login", handlerLogin)
 	if err != nil{
 		fmt.Println(err)
 		return
 	}
+
+	err = cmds.register("register", handlerRegister)
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+
+
 
 	err = cmds.run(&baseState, cmd)
 	

@@ -2,12 +2,12 @@ package main
 
 import(
 	"fmt"
-	"github.com/rgarcia2304/aggreGator/internal/config"
 	"errors"
 	"context"
 	"github.com/rgarcia2304/aggreGator/internal/database"
 	"github.com/google/uuid"
 	"time"
+	"database/sql"
 
 )
 
@@ -24,16 +24,17 @@ func handlerRegister(s *state, cmd command) error{
 
 	//register the user 
 	insertUser, err := s.db.CreateUser(ctx, database.CreateUserParams{
-		id: uuid.New(),
-		created_at: time.Now(),
-		updated_at: time.Now(),
-		name: cmd.args[2],
+		ID: uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name: sql.NullString{String: cmd.args[2], Valid: true},
 	})
 
 	if err != nil{
 		return err
 	}
 	
+	fmt.Println(insertUser)
 	fmt.Println("User was created")
 	return nil
 }
