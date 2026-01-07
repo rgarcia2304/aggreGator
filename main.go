@@ -79,6 +79,12 @@ func main(){
 		return
 	}
 
+	err = cmds.register("agg", handlerAgg)
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+
 	err = cmds.run(&baseState, cmd)
 	
 	if err != nil{
