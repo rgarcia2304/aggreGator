@@ -19,7 +19,8 @@ func handlerLogin(s *state, cmd command) error{
 	
 	ctx := context.Background()
 	//check if the user exists in the database
-	_, err := s.db.GetUser(ctx, sql.NullString{String: cmd.args[2], Valid: true})
+	usr, err := s.db.GetUser(ctx, sql.NullString{String: cmd.args[2], Valid: true})
+	fmt.Println(usr)
 	if err != nil{
 		return errors.New("The user was not found in the database")
 	}
