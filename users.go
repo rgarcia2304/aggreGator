@@ -8,11 +8,10 @@ import(
 
 func handlerUsers(s *state, cmd command) error{
 	if len(cmd.args) != 2{
-		return errors.New("You can not pass arguments to the reset command")
+		return errors.New("You can not pass arguments to the users command")
 	}
 
 	ctx := context.Background()
-	//check if the user exists in the database
 	usrLst, err := s.db.GetUsers(ctx)
 	if err != nil{
 		return errors.New("Issue with executing command")
