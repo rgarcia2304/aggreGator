@@ -84,6 +84,12 @@ func main(){
 		fmt.Println(err)
 		return
 	}
+	
+	err = cmds.register("addfeed", handlerFeeds)
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
 
 	err = cmds.run(&baseState, cmd)
 	
