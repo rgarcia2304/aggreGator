@@ -96,11 +96,18 @@ func main(){
 		fmt.Println(err)
 		return
 	}
+	
+	err = cmds.register("follow", handlerAddFollows)
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
 
 	err = cmds.run(&baseState, cmd)
 	
 	if err != nil{
 		fmt.Println(err)
 	}
-
+	
+	
 }
