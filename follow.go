@@ -10,7 +10,7 @@ import(
 	"time"
 )
 
-func handlerAddFollows(s *state, cmd command) error{
+func handlerAddFollows(s *state, cmd command, user database.User) error{
 	if len(cmd.args) != 3{
 		return errors.New("URL of feed must be passed")
 	}
@@ -28,20 +28,13 @@ func handlerAddFollows(s *state, cmd command) error{
 		return errors.New("There was an issue getting the feed at this URL")
 	}
 
-	//grab the connected user
-	queriedName := sql.NullString{String: s.cfg.Username, Valid: true}
-	//check if the name exists in the database
-	usr, err := s.db.GetUser(ctx, queriedName)
-	if err != nil{
-		return errors.New("Issue fetching user")
-	}
 
 	//connect that user to the feed
 	insertFollow, err := s.db.CreateFeedFollow(ctx, database.CreateFeedFollowParams{
 		ID: uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID: usr.ID,
+		UserID: user.ID,
 		FeedID: feed.ID,
 	})
 
@@ -54,3 +47,32 @@ func handlerAddFollows(s *state, cmd command) error{
 	
 	return nil
 }
+
+func handlerGetFollows(s *state, cmd command, user database.User) error{
+	if len(cmd.args) != 2{
+		return errors.New("No Arguments Should Be Passed")
+	}
+
+	ctx := context.Background()
+	
+	//grab the connected user
+	usrName := user.Name
+
+	//Get the users feeds 
+	userFollows, err := s.db.GetFollowsForUser(ctx, usrName)
+	if err != nil{
+		return err
+	}
+
+	respPrompt := fmt.Sprintf("This is %v's feed", s.cfg.Username)
+	fmt.Println(respPrompt)
+
+	for _, val := range userFollows{
+		//get the name of the feed and the name of the user s
+		fmt.Println(val.FeedName.String)
+	}
+	return nil
+}
+
+
+

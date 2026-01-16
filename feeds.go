@@ -10,19 +10,13 @@ import(
 	"time"
 )
 
-func handlerAddfeeds(s *state, cmd command) error{
+func handlerAddfeeds(s *state, cmd command, user database.User) error{
 	if len(cmd.args) != 4{
 		return errors.New("Name and URL of feed must be passed")
 	}
 
-	queriedName := sql.NullString{String: s.cfg.Username, Valid: true}
 	ctx := context.Background()
 
-	//check if the name exists in the database
-	usr, err := s.db.GetUser(ctx, queriedName)
-	if err != nil{
-		return errors.New("Issue fetching user")
-	}
 
 	//connect that user to the feed
 	insertFeed, err := s.db.CreateFeed(ctx, database.CreateFeedParams{
@@ -31,12 +25,26 @@ func handlerAddfeeds(s *state, cmd command) error{
 		UpdatedAt: time.Now(),
 		Name: sql.NullString{String: cmd.args[2], Valid: true},
 		Url: sql.NullString{String: cmd.args[3], Valid: true},
-		UserID: usr.ID,
+		UserID: user.ID,
 	})
 	if err != nil{
 		return err
 	}
-	fmt.Println("Feed" + insertFeed.Name.String)
+
+	//connect that user to the feed
+	_, follow_err := s.db.CreateFeedFollow(ctx, database.CreateFeedFollowParams{
+		ID: uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID: user.ID,
+		FeedID: insertFeed.ID,
+	})
+
+	if follow_err != nil{
+		return errors.New("Issue with following newly added feed")
+	}
+
+	fmt.Println("Feed " + insertFeed.Name.String + " created.")
 	
 	return nil
 }

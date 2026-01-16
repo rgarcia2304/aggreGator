@@ -85,7 +85,7 @@ func main(){
 		return
 	}
 	
-	err = cmds.register("addfeed", handlerAddfeeds)
+	err = cmds.register("addfeed", middlewearLoggedIn(handlerAddfeeds))
 	if err != nil{
 		fmt.Println(err)
 		return
@@ -97,7 +97,13 @@ func main(){
 		return
 	}
 	
-	err = cmds.register("follow", handlerAddFollows)
+	err = cmds.register("follow", middlewearLoggedIn(handlerAddFollows))
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+
+	err = cmds.register("following", middlewearLoggedIn(handlerGetFollows))
 	if err != nil{
 		fmt.Println(err)
 		return
