@@ -74,5 +74,39 @@ func handlerGetFollows(s *state, cmd command, user database.User) error{
 	return nil
 }
 
+func handlerDeleteFollow(s *state, cmd command, user database.User) error{
+	if len(cmd.args) != 3{
+		errors.New("You must input a feeds URL you want to unfollow")
+	}
+
+	//get the feed_id for that specific feed
+	ctx := context.Background()
+	
+	if s.cfg.Username == ""{
+		return errors.New("There is no User logged in ")
+	}
+	
+	//grab the connected feed
+	feed, err := s.db.GetFeedByURL(ctx, sql.NullString{String: cmd.args[2], Valid: true})
+
+	if err != nil{
+		return errors.New("There was an issue getting the feed at this URL")
+	}
+
+	//now delete the user
+	err = s.db.DeleteFollow(ctx, database.DeleteFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	})
+
+	if err != nil{
+		return errors.New("Return there has been an issue unfollowing the feed")
+	}
+
+	fmt.Println("Feed has been successfully unfollowed")
+	return nil
+
+}
+
 
 

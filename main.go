@@ -109,6 +109,12 @@ func main(){
 		return
 	}
 
+	err = cmds.register("unfollow", middlewearLoggedIn(handlerDeleteFollow))
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+
 	err = cmds.run(&baseState, cmd)
 	
 	if err != nil{
