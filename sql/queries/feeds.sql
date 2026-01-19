@@ -20,7 +20,7 @@ WHERE url = $1 LIMIT 1;
 
 -- name: MarkFeedFetched :one
 UPDATE feeds
-SET last_fetched_at = $1 and updated_at = $2
+SET last_fetched_at = $1, updated_at = $2
 WHERE id = $3
 RETURNING *;
 

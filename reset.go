@@ -17,7 +17,7 @@ func handlerReset(s *state, cmd command) error{
 	if err != nil{
 		return errors.New("Issue with executing command")
 	}
-	s.cfg.Username = ""
+	s.cfg.SetUser("")
 	fmt.Println("The database entries have been deleted")
 	return nil
 }

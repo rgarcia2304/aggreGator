@@ -84,16 +84,17 @@ func scrapeFeeds(s *state) error{
 	if err != nil{
 		return errors.New("Could not fetch any feeds")
 	}
-
+	fmt.Println(feed.Name.String)
 	//mark feed as fetched
-	_, err = s.db.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
+	newFeed, err := s.db.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
 		LastFetchedAt: sql.NullTime{Time: time.Now(), Valid: true},
 		UpdatedAt: time.Now(),
 		ID: feed.ID,
 	})
-	
-	feedRsp, err := fetchFeed(context.Background(), feed.Url.String)
 
+	fmt.Println(newFeed.Name.String)
+	feedRsp, err := fetchFeed(context.Background(), newFeed.Url.String)
+	
 	if err != nil{
 		return errors.New("Issue getting the feed response")
 	}
