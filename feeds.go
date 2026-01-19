@@ -77,3 +77,28 @@ func handlerListFeeds(s *state, cmd command) error{
 	return nil
 
 }
+
+func scrapeFeeds(s *state) error{
+	//fetch the next feed from the database
+	feed, err := s.db.GetNextFeedToFetch(context.Background()) 
+	if err != nil{
+		return errors.New("Could not fetch any feeds")
+	}
+
+	//mark feed as fetched
+	_, err = s.db.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
+		LastFetchedAt: sql.NullTime{Time: time.Now(), Valid: true},
+		UpdatedAt: time.Now(),
+		ID: feed.ID,
+	})
+	
+	feedRsp, err := fetchFeed(context.Background(), feed.Url.String)
+
+	if err != nil{
+		return errors.New("Issue getting the feed response")
+	}
+	
+	fmt.Println("Fetched: " + feedRsp.Channel.Title)
+	return  nil
+
+}

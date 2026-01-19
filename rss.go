@@ -8,6 +8,7 @@ import(
 	"io"
 	"encoding/xml"
 	"html"
+	"time"
 )
 
 type RSSFeed struct {
@@ -63,11 +64,21 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error){
 
 }
 
-func handlerAgg(s *state , cmd command) error{
-	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
-	if err != nil{
-		return err
+func handlerAgg(s *state, cmd command) error{
+	
+	if len(cmd.args) != 3{
+		return errors.New("Incorrect number of parameters passed in, must pass in a time")
 	}
-	fmt.Println(feed)
-	return nil
+
+	time_between_reqs, err := time.ParseDuration(cmd.args[2])
+	if err != nil{
+		return errors.New("A valid value must be passed in for duration to scrape")
+	}
+	consoleMsg := fmt.Sprintf("Collecting feeds every %v", time_between_reqs)
+	fmt.Println(consoleMsg)
+	ticker := time.NewTicker(time_between_reqs)
+	for ; ; <-ticker.C {
+		fmt.Println("New Request Being Made")
+		scrapeFeeds(s)
+	}	
 }
