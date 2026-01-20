@@ -11,7 +11,11 @@ You will need to have an up to date version of golang and I used postgres 15 to 
 
 ## Set Up 
 
-To start you will want to create a config file. Host this config file at the root of your computer. Name it .gatorconfig.json Inside it will contain a json file that will contain the current user and database url. It should look like this. 
+To start you will want to create a config file.
+Host this config file at the root of your computer.
+Name it .gatorconfig.json 
+Inside it will contain a json file that will 
+contain the current user and database url. It should look like this: 
 
 `
 {
@@ -28,7 +32,8 @@ Get your connection string: Will look something like this.
 `protocol://bob:@host:5432/gator` or generally like
 `protocol://username:password@host:port/database`
 
-To get all the updated tables you will need to run in sql/schemas folder inside the project 
+To get all the updated tables you will need to 
+run in sql/schemas folder inside the project 
 `goose postgres <connection_string> up `
 Do this until, you are at the highest migration. 
 
@@ -41,7 +46,7 @@ Some general commands to run are :
 `register` - Allows you to register a user 
 Usage - `go run . register {name of user}`
 
-`register` - Allows you to make user active
+`login` - Allows you to make user active
 Usage - `go run . login {name of registered user}`
 
 `addfeed` - Allows you to add feed for the user
