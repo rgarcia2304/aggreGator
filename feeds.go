@@ -78,6 +78,25 @@ func handlerListFeeds(s *state, cmd command) error{
 
 }
 
+func parsePubDate(s string) (time.Time, error) {
+    layouts := []string{
+        time.RFC1123Z,
+        time.RFC1123,
+        time.RFC822Z,
+        time.RFC822,
+        time.RFC3339Nano,
+        time.RFC3339,
+    }
+    var lastErr error
+    for _, l := range layouts {
+        if t, err := time.Parse(l, s); err == nil {
+            return t, nil
+        } else {
+            lastErr = err
+        }
+    }
+    return time.Time{}, lastErr
+}
 func scrapeFeeds(s *state) error{
 	//fetch the next feed from the database
 	feed, err := s.db.GetNextFeedToFetch(context.Background()) 
@@ -92,14 +111,49 @@ func scrapeFeeds(s *state) error{
 		ID: feed.ID,
 	})
 
-	fmt.Println(newFeed.Name.String)
 	feedRsp, err := fetchFeed(context.Background(), newFeed.Url.String)
 	
 	if err != nil{
 		return errors.New("Issue getting the feed response")
 	}
 	
-	fmt.Println("Fetched: " + feedRsp.Channel.Title)
+	fmt.Println("Length of Channel Item")
+	fmt.Println(len(feedRsp.Channel.Item))
+	fmt.Println("")
+	//loop through all the posts in the feed 
+	for _, post := range feedRsp.Channel.Item{
+	
+		pub, err := parsePubDate(post.PubDate)
+		if err != nil {
+			return fmt.Errorf("bad pubDate %q: %w", post.PubDate, err)
+		}
+		
+		//print("\n")
+		//fmt.Println("Now Browsing " + post.Title)
+		//fmt.Println("Description " + post.Description)
+		//fmt.Println("Link " + post.Link)
+		//print("\n")
+
+		newPost, err := s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID: uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Title: post.Title,
+			Url: post.Link,
+			Description: sql.NullString{String: post.Description, Valid: true},
+			PublishedAt: pub,
+			FeedID: newFeed.ID,
+		})
+		if err != nil{
+			fmt.Println(err)
+		}else{
+			fmt.Println("\n")
+			fmt.Println(newPost.Title)
+			fmt.Println(newPost.Url)
+			fmt.Println(newPost.Description.String)
+			fmt.Println("\n")
+		}
+	}
 	return  nil
 
 }

@@ -80,5 +80,5 @@ func handlerAgg(s *state, cmd command) error{
 	for ; ; <-ticker.C {
 		fmt.Println("New Request Being Made")
 		scrapeFeeds(s)
-	}	
+		}	
 }

@@ -48,7 +48,6 @@ func main(){
 	cmd := command{}
 	//register the arguments to get the commands 
 	cmd.args = os.Args
-	fmt.Print(cmd.args)
 	if len(cmd.args) < 2{
 		fmt.Println("Not enough arguments passed")
 		return 
@@ -110,6 +109,12 @@ func main(){
 	}
 
 	err = cmds.register("unfollow", middlewearLoggedIn(handlerDeleteFollow))
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+
+	err = cmds.register("browse", handlerBrowse)
 	if err != nil{
 		fmt.Println(err)
 		return
